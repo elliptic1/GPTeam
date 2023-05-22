@@ -1,5 +1,6 @@
 # Environment
 import os
+import sys
 from enum import Enum
 
 from .config import load_config
@@ -20,11 +21,18 @@ DEFAULT_WORLD_ID = config.world_id
 ANNOUNCER_DISCORD_TOKEN = os.getenv("ANNOUNCER_DISCORD_TOKEN")
 
 DEFAULT_SMART_MODEL = (
-    # ChatModelName.TURBO
-    ChatModelName.TURBO
+    ChatModelName.TURBO if "--turbo" in sys.argv else ChatModelName.CLAUDE if "--claude" in sys.argv else ChatModelName.GPT4
 )
-DEFAULT_FAST_MODEL = ChatModelName.TURBO
+
+DEFAULT_FAST_MODEL = (
+     ChatModelName.CLAUDE_INSTANT if "--claude" in sys.argv else ChatModelName.TURBO
+)
 
 
 # Tools
-DISCORD_ENABLED = True if os.getenv("ANNOUNCER_DISCORD_TOKEN", None) is not None and len(os.getenv("ANNOUNCER_DISCORD_TOKEN")) > 0 else False
+DISCORD_ENABLED = (
+    True
+    if os.getenv("ANNOUNCER_DISCORD_TOKEN", None) is not None
+    and len(os.getenv("ANNOUNCER_DISCORD_TOKEN")) > 0
+    else False
+)

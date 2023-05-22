@@ -4,8 +4,8 @@ from typing import Optional
 from uuid import UUID, uuid4
 
 from pydantic import BaseModel
-from src.utils.database.base import Tables
 
+from src.utils.database.base import Tables
 from src.utils.database.client import get_database
 
 from ..tools.name import ToolName
@@ -47,7 +47,7 @@ class Location(BaseModel):
         if allowed_agent_ids is None:
             allowed_agent_ids = []
 
-        if channel_id is not None and len(channel_id) == 0:
+        if channel_id is not None and len(str(channel_id)) == 0:
             channel_id = None
 
         super().__init__(

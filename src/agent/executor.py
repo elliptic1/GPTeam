@@ -23,6 +23,7 @@ from langchain.tools import BaseTool
 from pydantic import BaseModel
 from typing_extensions import override
 
+from src.utils.logging import agent_logger
 from src.world.context import WorldContext
 
 from ..memory.base import SingleMemory
@@ -30,7 +31,7 @@ from ..tools.base import CustomTool, get_tools
 from ..tools.context import ToolContext
 from ..tools.name import ToolName
 from ..utils.colors import LogColor
-from ..utils.formatting import print_to_console, print_to_console2
+from ..utils.formatting import print_to_console
 from ..utils.models import ChatModel
 from ..utils.parameters import DEFAULT_FAST_MODEL, DEFAULT_SMART_MODEL
 from ..utils.prompt import PromptString
@@ -279,8 +280,19 @@ class PlanExecutor(BaseModel):
         agent_name = self.context.get_agent_full_name(self.agent_id)
 
         for log in response.log.split("\n"):
-            suffix = log.split(":")[0] if ":" in log else "Thought"
-            print_to_console2(f"[{agent_name}] {suffix}: ", agent_name, log)
+            prefix_text = log.split(":")[0] if ":" in log else "Thought"
+            log_content = log.split(":", 1)[1].strip() if ":" in log else log.strip()
+
+            log_color = self.context.get_agent_color(self.agent_id)
+
+            agent_logger.info(
+                f"[{agent_name}] [{log_color}] [{prefix_text}] {log_content}"
+            )
+            print_to_console(
+                f"[{agent_name}] {prefix_text}: ",
+                log_color,
+                log_content,
+            )
 
         # If the agent is finished, return the output
         if isinstance(response, AgentFinish):
@@ -321,9 +333,15 @@ class PlanExecutor(BaseModel):
 
             result = f"Tool: '{formatted_tool_name}' is not found in tool list"
 
-            print_to_console2(
+            log_color = self.context.get_agent_color(self.agent_id)
+
+            agent_logger.info(
+                f"[{agent_name}] [{log_color}] [Action Response] {result}"
+            )
+
+            print_to_console(
                 f"[{agent_name}] Action Response: ",
-                agent_name,
+                log_color,
                 result,
             )
 
@@ -341,9 +359,13 @@ class PlanExecutor(BaseModel):
 
         result = await tool.run(response.tool_input, tool_context)
 
-        print_to_console2(
+        log_color = self.context.get_agent_color(self.agent_id)
+
+        agent_logger.info(f"[{agent_name}] [{log_color}] [Action Response] {result}")
+
+        print_to_console(
             f"[{agent_name}] Action Response: ",
-            agent_name,
+            log_color,
             result[:280] + "..." if len(result) > 280 else str(result),
         )
 
