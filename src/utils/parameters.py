@@ -21,7 +21,7 @@ ANNOUNCER_DISCORD_TOKEN = os.getenv("ANNOUNCER_DISCORD_TOKEN")
 
 DEFAULT_SMART_MODEL = (
     # ChatModelName.TURBO
-    ChatModelName.GPT4
+    ChatModelName.TURBO
 )
 DEFAULT_FAST_MODEL = ChatModelName.TURBO
 
